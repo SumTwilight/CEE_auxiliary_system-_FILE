@@ -1,48 +1,43 @@
-#include<cstdio>
-#include<iostream>
-#include<vector>
-#include<cstring>
-#include<sstream>
-#include<algorithm>
-#include<fstream>
+#include <algorithm>
+#include <cstdio>
+#include <cstring>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <vector>
 using namespace std;
 /*******************************************************************代码实现开始*******************************************************/
 /**************************************用于优先队列的宏************************************************/
-#define InHeap(n,i)				((-1<i)&&(i<n))			//判断PQ[i]是否合法
-#define Parent(i)				((i-1)>>1)				//PQ[i]的父节点((floor((i-1)/2),i无论正负)
-#define LastInternal(n)			Parent(n-1)				//最后一个内部节点(即末节点的父亲)
-#define LChild(i)				(1+(i<<1))				//PQ[i]的左孩子
-#define RChild(i)				((1+i)<<1)				//PQ[i]的右孩子
-#define ParentValid(i)			(0<i)					//判断PQ[i]是否有父亲
-#define LChildValid(n,i)		InHeap(n,LChild(i))		//判断PQ[i]是否有左孩子
-#define RChildValid(n,i)		InHeap(n,RChild(i))		//判断PQ[i]是否有两个孩子
-#define Bigger(PQ,i,j)			((PQ[i]<PQ[j])?j:i)	//取大者（相等时前者优先）
-#define ProperParent(PQ,n,i)	( RChildValid(n,i)?	Bigger( PQ , Bigger( PQ ,i, LChild(i) ), RChild(i) ):\
-													( LChildValid(n,i) ? Bigger( PQ ,i , LChild(i) ): i )\
-								)						//父子（至多）三者中的大者		
-//ifstream input("intest3.txt");
-ifstream input_universities("universities3.txt");
-ifstream input_students("students3.txt");
-ofstream output("outtest1.txt");
+#define InHeap(n, i) ((-1 < i) && (i < n))																												  //判断PQ[i]是否合法
+#define Parent(i) ((i - 1) >> 1)																														  //PQ[i]的父节点((floor((i-1)/2),i无论正负)
+#define LastInternal(n) Parent(n - 1)																													  //最后一个内部节点(即末节点的父亲)
+#define LChild(i) (1 + (i << 1))																														  //PQ[i]的左孩子
+#define RChild(i) ((1 + i) << 1)																														  //PQ[i]的右孩子
+#define ParentValid(i) (0 < i)																															  //判断PQ[i]是否有父亲
+#define LChildValid(n, i) InHeap(n, LChild(i))																											  //判断PQ[i]是否有左孩子
+#define RChildValid(n, i) InHeap(n, RChild(i))																											  //判断PQ[i]是否有两个孩子
+#define Bigger(PQ, i, j) ((PQ[i] < PQ[j]) ? j : i)																										  //取大者（相等时前者优先）
+#define ProperParent(PQ, n, i) (RChildValid(n, i) ? Bigger(PQ, Bigger(PQ, i, LChild(i)), RChild(i)) : (LChildValid(n, i) ? Bigger(PQ, i, LChild(i)) : i)) //父子（至多）三者中的大者
+ifstream input_universities(".\\C++\\CEE_auxiliary_system-_FILE/test/universities3.txt");	//vscode 相对路径是从.vscode开始算的
+ifstream input_students("D:\\WorkingArea\\C++\\CEE_auxiliary_system-_FILE/test/students3.txt");
+ofstream output("D:\\WorkingArea\\C++\\CEE_auxiliary_system-_FILE\\output\\outtest1.txt");
 
 //高考成绩信息类
 class CEE_GradeStruct
 {
-public:
-	int Total_Score;	//总分
-	int Chinese;		//语文
-	int Math;			//数学
-	int English;		//英语
-	int Comprehensive;	//综合成绩
+  public:
+	int Total_Score;   //总分
+	int Chinese;	   //语文
+	int Math;		   //数学
+	int English;	   //英语
+	int Comprehensive; //综合成绩
 
-						//默认构造函数
+	//默认构造函数
 	CEE_GradeStruct()
 	{
-
 	}
 	//构造函数
-	CEE_GradeStruct(int T, int C, int M, int E, int Co) :
-		Total_Score(T), Chinese(C), Math(M), English(E), Comprehensive(Co) {}
+	CEE_GradeStruct(int T, int C, int M, int E, int Co) : Total_Score(T), Chinese(C), Math(M), English(E), Comprehensive(Co) {}
 	//析构函数
 	~CEE_GradeStruct() {}
 };
@@ -50,19 +45,17 @@ public:
 //志愿专业信息类
 class Volunteer_MajorStruct
 {
-public:
-	string University_Number;		//院校编号
-	string Major_Number[5];			//专业编号
-	int Major_Num;					//专业数量
-									//构造函数
+  public:
+	string University_Number; //院校编号
+	string Major_Number[5];   //专业编号
+	int Major_Num;			  //专业数量
+							  //构造函数
 	Volunteer_MajorStruct()
 	{
-
 	}
 	//析构函数
 	~Volunteer_MajorStruct()
 	{
-
 	}
 
 	void insert(string Num, string MNum[], int len)
@@ -77,22 +70,21 @@ public:
 //学生信息类
 class StudentStruct
 {
-private:
-	string Student_ID;							//考生号
-	string Name;								//学生姓名
-	CEE_GradeStruct Grade;						//高考成绩
-	Volunteer_MajorStruct Volunteer_Major[6];	//志愿信息
-	bool transferred;							//是否服从调剂
-	int Major_Universities_Num;					//志愿数
-	string Enroll_Universities;					//被录取院校
-	string Enroll_Major;						//被录取专业
-	int Enroll_Status;							//被提档录取=1，被提档=2，未录取=0
+  private:
+	string Student_ID;						  //考生号
+	string Name;							  //学生姓名
+	CEE_GradeStruct Grade;					  //高考成绩
+	Volunteer_MajorStruct Volunteer_Major[6]; //志愿信息
+	bool transferred;						  //是否服从调剂
+	int Major_Universities_Num;				  //志愿数
+	string Enroll_Universities;				  //被录取院校
+	string Enroll_Major;					  //被录取专业
+	int Enroll_Status;						  //被提档录取=1，被提档=2，未录取=0
 
-public:
+  public:
 	//默认构造函数
 	StudentStruct()
 	{
-
 	}
 	//构造函数
 	StudentStruct(string ID, string name, CEE_GradeStruct C, int n, Volunteer_MajorStruct V[], bool trans)
@@ -110,7 +102,6 @@ public:
 	//析构函数
 	~StudentStruct()
 	{
-
 	}
 
 	//返回第n个志愿学校中的志愿专业数
@@ -154,9 +145,10 @@ public:
 	{
 		Enroll_Universities = U;
 		Enroll_Major = M;
-		if (Enroll_Major == "00000")	//提档未录取
+		if (Enroll_Major == "00000") //提档未录取
 			Enroll_Status = 2;
-		else Enroll_Status = 1;		//录取成功
+		else
+			Enroll_Status = 1; //录取成功
 	}
 
 	//打印考生号，考生姓名，考生总分
@@ -175,63 +167,61 @@ public:
 	}
 
 	//重载 < 号
-	bool operator<(const StudentStruct& s)
+	bool operator<(const StudentStruct &s)
 	{
 		//比较成绩
 		if (Grade.Total_Score < s.Grade.Total_Score)
 			return true;
 		else if (Grade.Total_Score > s.Grade.Total_Score)
 			return false;
-		else if (Grade.Total_Score == s.Grade.Total_Score)	//总分相同
+		else if (Grade.Total_Score == s.Grade.Total_Score) //总分相同
 		{
 			//比较语文
 			if (Grade.Chinese < s.Grade.Chinese)
 				return true;
 			else if (Grade.Chinese > s.Grade.Chinese)
 				return false;
-			else if (Grade.Chinese == s.Grade.Chinese)	//语文相同
+			else if (Grade.Chinese == s.Grade.Chinese) //语文相同
 			{
 				//比较数学
 				if (Grade.Math < s.Grade.Total_Score)
 					return true;
 				else if (Grade.Math > s.Grade.Math)
 					return false;
-				else if (Grade.Math == s.Grade.Math)	//数学相同
+				else if (Grade.Math == s.Grade.Math) //数学相同
 				{
 					//比较英语
 					if (Grade.English < s.Grade.English)
 						return true;
 					else if (Grade.English > s.Grade.English)
 						return false;
-					else if (Grade.English == s.Grade.English)	//语文相同
+					else if (Grade.English == s.Grade.English) //语文相同
 					{
 						//比较综合
 						if (Grade.Comprehensive < s.Grade.Comprehensive)
 							return true;
 						else if (Grade.Comprehensive > s.Grade.Comprehensive)
 							return false;
-						else if (Grade.Comprehensive == s.Grade.Comprehensive)//全部成绩相同
+						else if (Grade.Comprehensive == s.Grade.Comprehensive) //全部成绩相同
 							return true;
 					}
 				}
-
 			}
-
 		}
-
+		return false;
 	}
 };
 
 //主修专业信息类
 class MajorStruct
 {
-public:
-	string Major_Number;					//专业编号
-	string Major_Name;						//专业名称
-	int NumberOfPlan;						//计划招收人数
-	int Grade;								//专业成绩
-	int NumOfEnrolled;						//已录取人数
-	vector<StudentStruct> Stu_Enrolled;		//已录取的考生
+  public:
+	string Major_Number;				//专业编号
+	string Major_Name;					//专业名称
+	int NumberOfPlan;					//计划招收人数
+	int Grade;							//专业成绩
+	int NumOfEnrolled;					//已录取人数
+	vector<StudentStruct> Stu_Enrolled; //已录取的考生
 	MajorStruct *Next;
 	//构造函数1
 	MajorStruct()
@@ -272,9 +262,10 @@ public:
 		{
 			Stu_Enrolled.push_back(S);
 			NumOfEnrolled++;
-			return true;		//录取成功
+			return true; //录取成功
 		}
-		else return false;		//录取失败
+		else
+			return false; //录取失败
 	}
 
 	//检查是否已录满
@@ -297,8 +288,10 @@ public:
 		{
 			Stu_Enrolled[i].ToPrintf();
 		}
-		output << "以上为本专业录取人员" << endl << endl;
-		cout << "以上为本专业录取人员" << endl << endl;
+		output << "以上为本专业录取人员" << endl
+			   << endl;
+		cout << "以上为本专业录取人员" << endl
+			 << endl;
 	}
 
 	//打印本专业信息
@@ -312,14 +305,14 @@ public:
 //高校信息类
 class UniversityStruct
 {
-private:
-	MajorStruct * Majors_header;		//专业信息
-	int length;						//专业数量
-	string University_Number;		//院校编号
-	string University_Name;			//院校名称
-									//	int Lowest_Grade;				//院校最低录取分
+  private:
+	MajorStruct *Majors_header; //专业信息
+	int length;					//专业数量
+	string University_Number;   //院校编号
+	string University_Name;		//院校名称
+								//	int Lowest_Grade;				//院校最低录取分
 
-public:
+  public:
 	//构造函数：院校信息初始化
 	UniversityStruct(string Num, string Name)
 	{
@@ -333,7 +326,6 @@ public:
 	//析构函数
 	~UniversityStruct()
 	{
-
 	}
 
 	//返回专业数量
@@ -364,13 +356,13 @@ public:
 				break;
 			}
 			else if (node != Majors_header &&
-				node->Grade <= newnode->Grade &&
-				(node->Next->Grade <= newnode->Grade || node->Next == nullptr))
+					 node->Grade <= newnode->Grade &&
+					 (node->Next->Grade <= newnode->Grade || node->Next == nullptr))
 			{
 				node = node->Next;
 			}
 			else if ((node->Grade <= newnode->Grade || node == Majors_header) &&
-				node->Next->Grade > newnode->Grade)
+					 node->Next->Grade > newnode->Grade)
 			{
 				newnode->Next = node->Next;
 				node->Next = newnode;
@@ -432,20 +424,20 @@ public:
 			{
 				node = node->Next;
 			}
-			if (node->Grade <= Grade && !node->Check_Enroll_Plan())	//分数达到，录取该生
+			if (node->Grade <= Grade && !node->Check_Enroll_Plan()) //分数达到，录取该生
 			{
 				Stu.SetEnroll(University_Number, node->Major_Number);
 				node->EnrollStu(Stu);
 				return 1;
 			}
 		}
-		if (Majors_header->Next->Grade <= Grade && Stu.Gettransferred())	//提档未录取
+		if (Majors_header->Next->Grade <= Grade && Stu.Gettransferred()) //提档未录取
 		{
 			Stu.SetEnroll(University_Number, "00000");
 			return 2;
 		}
-		else return 0;	//未录取
-
+		else
+			return 0; //未录取
 	}
 
 	//录取调剂考生
@@ -456,8 +448,8 @@ public:
 		MajorStruct *node = new MajorStruct;
 		node = Majors_header->Next;
 		output << "可录取该考生的专业如下：" << endl;
-		cout<< "可录取该考生的专业如下：" << endl;
-		while (node != nullptr&&node->Grade <= Grade)	//输出所有可调剂专业		
+		cout << "可录取该考生的专业如下：" << endl;
+		while (node != nullptr && node->Grade <= Grade) //输出所有可调剂专业
 		{
 			output << "***";
 			cout << "***";
@@ -486,9 +478,9 @@ public:
 	}
 
 	//重新定义“<”号
-	bool operator<(const UniversityStruct& s)
+	bool operator<(const UniversityStruct &s)
 	{
-		stringstream s1, s2;	//这里使用了字符串流，将字符串中的数字转换为整形
+		stringstream s1, s2; //这里使用了字符串流，将字符串中的数字转换为整形
 		int Num1, Num2;
 		s1 << University_Number;
 		s1 >> Num1;
@@ -499,46 +491,48 @@ public:
 };
 
 //优先队列
-class PQ_Student	//Priority_Queue_Student
+class PQ_Student //Priority_Queue_Student
 {
-private:
-	vector<StudentStruct>PQ;
+  private:
+	vector<StudentStruct> PQ;
 	int size;
-protected:
+
+  protected:
 	//下滤
 	int percolateDown(int n, int i)
 	{
-		int j;	//i及其（至多两个）孩子中的父亲
+		int j; //i及其（至多两个）孩子中的父亲
 		while (i != (j = ProperParent(PQ, size, i)))
 		{
 			swap(PQ[i], PQ[j]);
-			i = j;	//二者换位，并继续考察下降后的i
+			i = j; //二者换位，并继续考察下降后的i
 		}
-		return i;//返回下滤抵达的位置
+		return i; //返回下滤抵达的位置
 	}
 	//上滤
 	int percolateUp(int i)
 	{
-		while (ParentValid(i))	//只要i还有父亲（还未抵达堆顶），则
+		while (ParentValid(i)) //只要i还有父亲（还未抵达堆顶），则
 		{
-			int j = Parent(i);	//将i的父亲记作j
-			if (PQ[i] < PQ[j])	break;	//一旦当前父子不再逆序，上滤就完成。
+			int j = Parent(i); //将i的父亲记作j
+			if (PQ[i] < PQ[j])
+				break; //一旦当前父子不再逆序，上滤就完成。
 			swap(PQ[i], PQ[j]);
-			i = j;		//否则父子交换位置，并继续考查上一层
+			i = j; //否则父子交换位置，并继续考查上一层
 		}
-		return i;//返回上滤最终抵达的位置。
+		return i; //返回上滤最终抵达的位置。
 	}
 
-public:
+  public:
 	//默认构造函数
 	PQ_Student() { size = 0; }
 
 	//插入一个元素
 	void insert(StudentStruct Stu)
 	{
-		PQ.push_back(Stu);	//首先将新元素插入末尾
+		PQ.push_back(Stu); //首先将新元素插入末尾
 		size++;
-		percolateUp(size - 1);	//再将该元素实施上滤调整
+		percolateUp(size - 1); //再将该元素实施上滤调整
 	}
 
 	//返回优先队列中的第一个元素(若优先队列非空)
@@ -546,6 +540,8 @@ public:
 	{
 		if (size != 0)
 			return PQ[0];
+		else
+			return PQ[0];	//消除警告
 	}
 
 	//删除优先队列中的第一个元素(若优先队列非空)
@@ -555,10 +551,11 @@ public:
 		{
 			StudentStruct maxElem = PQ[0];
 			PQ[0] = PQ[--size];
-			percolateDown(size, 0);//对新堆顶实施下滤
+			percolateDown(size, 0); //对新堆顶实施下滤
 			PQ.pop_back();
-			return maxElem;	//返回此前备份的最大元素
+			return maxElem; //返回此前备份的最大元素
 		}
+		return PQ[0];
 	}
 
 	//检查优先队列是否为空
@@ -579,14 +576,14 @@ public:
 //初始化Universities;
 void InitUniversities(vector<UniversityStruct> &Universities)
 {
-	cout<<"*************进入录入院校信息功能***********************\n\t手动录入请输入1，文件读入请输入2。" << endl;
+	cout << "*************进入录入院校信息功能***********************\n\t手动录入请输入1，文件读入请输入2。" << endl;
 	int flag;
 	cin >> flag;
-	if (flag == 1) 
+	if (flag == 1)
 	{
 		cout << "请输入录入院校数" << endl;
 		int n;
-		cin>> n;
+		cin >> n;
 		cout << "\t请依次输入院校信息" << endl;
 		for (int i = 0; i < n; ++i)
 		{
@@ -601,7 +598,7 @@ void InitUniversities(vector<UniversityStruct> &Universities)
 				string MNum, MName;
 				int NOP, Gra;
 				cin >> MNum >> MName >> NOP >> Gra;
-				MajorStruct Major(MNum, MName, NOP, Gra);	//调用构造函数2
+				MajorStruct Major(MNum, MName, NOP, Gra); //调用构造函数2
 				U.insert(Major);
 			}
 			Universities.push_back(U);
@@ -623,7 +620,7 @@ void InitUniversities(vector<UniversityStruct> &Universities)
 				string MNum, MName;
 				int NOP, Gra;
 				input_universities >> MNum >> MName >> NOP >> Gra;
-				MajorStruct Major(MNum, MName, NOP, Gra);	//调用构造函数2
+				MajorStruct Major(MNum, MName, NOP, Gra); //调用构造函数2
 				U.insert(Major);
 			}
 			Universities.push_back(U);
@@ -643,35 +640,35 @@ void InitStudents(PQ_Student &Students)
 	{
 		cout << "\t请输入考生数：" << endl;
 		int n;
-		cin>> n;
+		cin >> n;
 		cout << "\t请依次输入考生信息" << endl;
 		for (int i = 0; i < n; ++i)
 		{
-			cout << "考生"<<i+1<<"：考生号\t姓名\t服从调剂\t总分\t语文\t数学\t英语\t综合成绩\t志愿数" << endl;
+			cout << "考生" << i + 1 << "：考生号\t姓名\t服从调剂\t总分\t语文\t数学\t英语\t综合成绩\t志愿数" << endl;
 			string id, name;
-			bool transferred;	//服从调剂
-			int Total_Score;	//总分
-			int Chinese;		//语文
-			int Math;			//数学
-			int English;		//英语
-			int Comprehensive;	//综合成绩
-			int m;				//m个志愿
-			cin>> id >> name >> transferred >> Total_Score >> Chinese >> Math >> English >> Comprehensive >> m;
-			CEE_GradeStruct C(Total_Score, Chinese, Math, English, Comprehensive);	//调用构造函数，初始化考生高考成绩
+			bool transferred;  //服从调剂
+			int Total_Score;   //总分
+			int Chinese;	   //语文
+			int Math;		   //数学
+			int English;	   //英语
+			int Comprehensive; //综合成绩
+			int m;			   //m个志愿
+			cin >> id >> name >> transferred >> Total_Score >> Chinese >> Math >> English >> Comprehensive >> m;
+			CEE_GradeStruct C(Total_Score, Chinese, Math, English, Comprehensive); //调用构造函数，初始化考生高考成绩
 
 			Volunteer_MajorStruct V[6];
 			for (int j = 0; j < m; ++j)
 			{
-				string Num, MNum[5];	//院校编号，志愿专业
-				int len;	//k个志愿专业
+				string Num, MNum[5]; //院校编号，志愿专业
+				int len;			 //k个志愿专业
 				cout << "院校编号\t志愿专业数" << endl;
-				cin>> Num >> len;
+				cin >> Num >> len;
 				for (int q = 0; q < len; ++q)
 				{
-					cout << "志愿专业" << q + 1 <<"：";
+					cout << "志愿专业" << q + 1 << "：";
 					cin >> MNum[q];
 				}
-				V[j].insert(Num, MNum, len);	//插入志愿j
+				V[j].insert(Num, MNum, len); //插入志愿j
 			}
 			StudentStruct Stu(id, name, C, m, V, transferred);
 			Students.insert(Stu);
@@ -684,25 +681,25 @@ void InitStudents(PQ_Student &Students)
 		for (int i = 0; i < n; ++i)
 		{
 			string id, name;
-			bool transferred;	//服从调剂
-			int Total_Score;	//总分
-			int Chinese;		//语文
-			int Math;			//数学
-			int English;		//英语
-			int Comprehensive;	//综合成绩
-			int m;				//m个志愿
+			bool transferred;  //服从调剂
+			int Total_Score;   //总分
+			int Chinese;	   //语文
+			int Math;		   //数学
+			int English;	   //英语
+			int Comprehensive; //综合成绩
+			int m;			   //m个志愿
 			input_students >> id >> name >> transferred >> Total_Score >> Chinese >> Math >> English >> Comprehensive >> m;
-			CEE_GradeStruct C(Total_Score, Chinese, Math, English, Comprehensive);	//调用构造函数，初始化考生高考成绩
+			CEE_GradeStruct C(Total_Score, Chinese, Math, English, Comprehensive); //调用构造函数，初始化考生高考成绩
 
 			Volunteer_MajorStruct V[6];
 			for (int j = 0; j < m; ++j)
 			{
-				string Num, MNum[5];	//院校编号，志愿专业
-				int len;	//k个志愿专业
+				string Num, MNum[5]; //院校编号，志愿专业
+				int len;			 //k个志愿专业
 				input_students >> Num >> len;
 				for (int q = 0; q < len; ++q)
 					input_students >> MNum[q];
-				V[j].insert(Num, MNum, len);	//插入志愿j
+				V[j].insert(Num, MNum, len); //插入志愿j
 			}
 			StudentStruct Stu(id, name, C, m, V, transferred);
 			Students.insert(Stu);
@@ -718,7 +715,7 @@ void EnrollStu(vector<UniversityStruct> &Universities, PQ_Student &Students, PQ_
 	cout << "*************进入自动化录取考生模块*********************" << endl;
 	while (!Students.empty())
 	{
-		int status = 0;//录取状态
+		int status = 0; //录取状态
 		StudentStruct Stu = Students.getMax();
 		int NumOfStu_Major_Universities = Stu.GetMajor_Universities_Num();
 		for (int i = 0; i < NumOfStu_Major_Universities; ++i)
@@ -727,7 +724,7 @@ void EnrollStu(vector<UniversityStruct> &Universities, PQ_Student &Students, PQ_
 			while (Universities[index].GetUniversity_Number() != Stu.GetV_Universities(i))
 				++index;
 			status = Universities[index].EnrollStu(Stu, i);
-			if (status == 1)	//提档成功，录取成功
+			if (status == 1) //提档成功，录取成功
 			{
 				output << "考生：";
 				cout << "考生：";
@@ -736,7 +733,7 @@ void EnrollStu(vector<UniversityStruct> &Universities, PQ_Student &Students, PQ_
 				cout << "录取成功" << endl;
 				break;
 			}
-			else if (status == 2)	//提档成功，等待调剂
+			else if (status == 2) //提档成功，等待调剂
 			{
 				output << "考生：";
 				cout << "考生：";
@@ -748,7 +745,7 @@ void EnrollStu(vector<UniversityStruct> &Universities, PQ_Student &Students, PQ_
 			}
 			//未提档，继续下一志愿院校录取
 		}
-		if (status == 0)	//该考生志愿期望过高，录取失败。
+		if (status == 0) //该考生志愿期望过高，录取失败。
 		{
 			output << "考生：";
 			cout << "考生：";
@@ -759,8 +756,9 @@ void EnrollStu(vector<UniversityStruct> &Universities, PQ_Student &Students, PQ_
 		}
 		Students.delMax();
 	}
-	output << "*************自动化录取考生结束*************************\n" << endl;
-	cout<< "*************自动化录取考生结束*************************\n\t返回主菜单" << endl;
+	output << "*************自动化录取考生结束*************************\n"
+		   << endl;
+	cout << "*************自动化录取考生结束*************************\n\t返回主菜单" << endl;
 }
 
 //手动录取调剂考生
@@ -770,7 +768,7 @@ void EnrollTransStu(vector<UniversityStruct> &Universities, PQ_Student &Enroll_F
 	cout << "*************进入手动录取调剂录取考生模块***************" << endl;
 	output << "有" << Enroll_Fail_Stu.Getsize() << "个学生需要被调剂" << endl;
 	cout << "有" << Enroll_Fail_Stu.Getsize() << "个学生需要被调剂" << endl;
-	while (!Enroll_Fail_Stu.empty())	//调剂学生
+	while (!Enroll_Fail_Stu.empty()) //调剂学生
 	{
 		StudentStruct Stu = Enroll_Fail_Stu.getMax();
 		string University = Stu.ToPrintf_Enroll();
@@ -779,9 +777,9 @@ void EnrollTransStu(vector<UniversityStruct> &Universities, PQ_Student &Enroll_F
 			index++;
 		if (Universities[index].EnrollTransStu(Stu))
 			Enroll_Fail_Stu.delMax();
-
 	}
-	output << "*************手动录取调剂录取考生模块结束***************\n" << endl;
+	output << "*************手动录取调剂录取考生模块结束***************\n"
+		   << endl;
 	cout << "*************手动录取调剂录取考生模块结束***************\n\t返回主菜单" << endl;
 }
 
@@ -789,9 +787,9 @@ void EnrollTransStu(vector<UniversityStruct> &Universities, PQ_Student &Enroll_F
 void Printf(vector<UniversityStruct> &Universities, PQ_Student Enroll_Fail_Stu)
 {
 	output << "*************进入打印考生录取情况模块*******************" << endl;
-	cout<< "*************进入打印考生录取情况模块*******************" << endl;
+	cout << "*************进入打印考生录取情况模块*******************" << endl;
 	output << "请输入需要查询录取情况的院校专业代号（若要打印所有院校录取情况，请输入1）：";
-	cout<< "请输入需要查询录取情况的院校专业代号（若要打印所有院校录取情况，请输入1）：";
+	cout << "请输入需要查询录取情况的院校专业代号（若要打印所有院校录取情况，请输入1）：";
 	string Num;
 	cin >> Num;
 	output << Num << endl;
@@ -815,29 +813,29 @@ void Printf(vector<UniversityStruct> &Universities, PQ_Student Enroll_Fail_Stu)
 	if (!Enroll_Fail_Stu.empty())
 	{
 		output << "以下为滑档考生：\n考生号\t姓名\t总分" << endl;
-		cout<< "以下为滑档考生：\n考生号\t姓名\t总分" << endl;
+		cout << "以下为滑档考生：\n考生号\t姓名\t总分" << endl;
 		while (!Enroll_Fail_Stu.empty())
 		{
 			Enroll_Fail_Stu.getMax().ToPrintf();
 			Enroll_Fail_Stu.delMax();
 		}
 	}
-	else 
-	{ 
-		output << "无滑档考生" << endl; 
+	else
+	{
+		output << "无滑档考生" << endl;
 		cout << "无滑档考生" << endl;
 	}
-	output << "*************打印考生录取情况模块结束*******************\n" << endl;
+	output << "*************打印考生录取情况模块结束*******************\n"
+		   << endl;
 	cout << "*************打印考生录取情况模块结束*******************\n\t返回主菜单" << endl;
 }
 
-
 int main()
 {
-	vector<UniversityStruct> Universities;	//院校信息
-	PQ_Student Students;					//考生信息
-	PQ_Student Enrolling_Stu;				//提档未录取考生
-	PQ_Student Enroll_Fail_Stu;				//滑档考生
+	vector<UniversityStruct> Universities; //院校信息
+	PQ_Student Students;				   //考生信息
+	PQ_Student Enrolling_Stu;			   //提档未录取考生
+	PQ_Student Enroll_Fail_Stu;			   //滑档考生
 	int op;
 	//output << "*************高校高考招生自动化录取辅助系统*************" << endl;
 	cout << "*************高校高考招生自动化录取辅助系统*************" << endl;
